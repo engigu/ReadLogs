@@ -7,6 +7,6 @@ services:
     image: "read-logs-server"
     volumes: 
       - /tmp/project_logs:/code/logs
-      - ./:/code
+      # - ./:/code
     ports: 
       - "9700:5000"
