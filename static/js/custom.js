@@ -20,7 +20,7 @@ var renderData = function(data){
     if(data['modified'] == true){
         $(".renderBlock").html("");
         for (var i in data['lines']) {
-          $(".renderBlock").append("<p>" + data['lines'][i] + "</p>");
+          $(".renderBlock").append("<xmp>" + data['lines'][i] + "</xmp>");
         }
         if(data.length==0){
             $(".renderBlock").html("<p>No Data Available</p>");
