@@ -11,9 +11,18 @@ import os
 from flask import (render_template, jsonify, request)
 import json
 from collections import defaultdict
-from config import app
+from config import app, Config
 
 modifiedTime = {}
+
+
+def remove_sapce(raw):
+    rules = ['\n']
+    
+    for rule in rules:
+        raw = raw.replace(rule, '')
+    return raw
+
 
 
 def files_from_dir(dirPath, logfiles={}):
@@ -81,6 +90,7 @@ def get_content():
                     f.seek(max(fsize - 1024, 0), 0)
                     lines = f.readlines()
                     lines = lines[-10:]
+                    lines = [remove_sapce(line) for line in lines]
                 results['lines'] = lines
                 results['modified'] = True
     except Exception as e:
