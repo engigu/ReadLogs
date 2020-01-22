@@ -82,15 +82,15 @@ def get_content():
             with open(fn, "r") as f:
                 f.seek(0, 2)
                 fsize = f.tell()
-                # print(fsize)
+                print('fsize', fsize)
                 if modified and not newfile:
                     f.seek(0, 0)
                     lines = f.readlines()
                 else:
                     f.seek(max(fsize - 1024, 0), 0)
                     lines = f.readlines()
-                    lines = lines[-10:]
-                    lines = [remove_sapce(line) for line in lines]
+                    lines = lines[-Config.LASTS_LINES:]
+                lines = [remove_sapce(line) for line in lines]
                 results['lines'] = lines
                 results['modified'] = True
     except Exception as e:
