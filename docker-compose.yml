@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  read-logs-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: "read-logs-server"
+    volumes: 
+      - /tmp/project_logs:/code/logs
+    ports: 
+      - "9700:5000"
