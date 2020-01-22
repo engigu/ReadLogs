@@ -17,7 +17,7 @@ modifiedTime = {}
 
 
 def remove_sapce(raw):
-    rules = ['\n']
+    rules = ['\\n']
     
     for rule in rules:
         raw = raw.replace(rule, '')
