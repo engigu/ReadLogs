@@ -6,8 +6,7 @@ app.secret_key = 'aQRaFWWWaAa!#$43$aa!!!AsSSQ'
 
 
 class Config:
-    
-    HTML_TITLE = 'Logs Viewer'    
+
+    HTML_TITLE = 'Logs Viewer'
 
     LASTS_VIEW_LINES = 20
-        

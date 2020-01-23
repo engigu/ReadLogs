@@ -47,18 +47,19 @@ class LogsQueue(metaclass=SameOriginSingleton):
             self.pre_logs.append(newline)
 
     def get_pre_logs(self):
-        # lines = subprocess.getoutput('tail -n %s "%s"' % (self.size, self.log_path))
-        # [self.push_to_pre_logs(newline=line) for line in lines.split('\n')]
+        lines = subprocess.getoutput('tail -n %s "%s"' % (self.size, self.log_path))
+        [self.push_to_pre_logs(newline=line) for line in lines.split('\n')]
 
-        # 不用上面实现, 不适用于windows
-        with open(self.log_path, 'r') as f:
-            f.seek(0, 2)
-            total = f.tell()
+        # # 不用上面实现, 不适用于windows
+        # with open(self.log_path, 'r') as f:
+        #     f.seek(0, 2)
+        #     total = f.tell()
+        #     print(t)
 
-            f.seek(max(total - (self.size // 10) * 1024, 0), 0)
-            lines = f.readlines()[-self.size:]
+        #     f.seek(max(total - (self.size // 10) * 1024, 0), 0)
+        #     lines = f.readlines()[-self.size:]
 
-        [self.push_to_pre_logs(newline=line) for line in lines]
+        # [self.push_to_pre_logs(newline=line) for line in lines]
 
     def run(self):
         # for line in sh.tail('-f', '-n', self.size, self.log_path, _iter=True):
