@@ -11,3 +11,6 @@ templates: render data in html pages
 The app is built using Flask in Python and template made by Bootstrap library.
 
 https://github.com/mitulshah44/read_logs_in_flask
+
+
+挂载的目录要确保 当前用户可读 chmod 777 -R .

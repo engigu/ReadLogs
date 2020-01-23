@@ -6,5 +6,5 @@ app.secret_key = 'aQRaFWWWaAa!#$43$aa!!!AsSSQ'
 
 class Config:
     
-    LASTS_LINES = 20
+    LASTS_VIEW_LINES = 20
     
