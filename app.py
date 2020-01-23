@@ -114,9 +114,9 @@ def run():
 def main():
     """ Homepage to render data"""
     res = get_logs()
-    return render_template('index.html', data=res)
+    return render_template('index.html', data=res, html_title=html_title)
 
 
 if __name__ == "__main__":
     run()
-    
+
