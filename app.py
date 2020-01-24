@@ -110,11 +110,17 @@ def run():
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)
 
 
+# @app.route('/', methods=['GET'])
+# def main():
+#     """ Homepage to render data"""
+#     res = get_logs()
+#     return render_template('index.html', data=res, html_title=Config.HTML_TITLE)
+
 @app.route('/', methods=['GET'])
 def main():
     """ Homepage to render data"""
     res = get_logs()
-    return render_template('index.html', data=res, html_title=Config.HTML_TITLE)
+    return render_template('log.html', data=res, html_title=Config.HTML_TITLE)
 
 
 if __name__ == "__main__":
