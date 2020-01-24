@@ -7,9 +7,9 @@ from flask import Flask, render_template, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 # from flask_httpauth import HTTPBasicAuth
 from flask_socketio import SocketIO, emit
-from threading import Thread
+from threading import Thread, Lock
 
-from logs_to_queue import LogsQueue, NEW_LINE_QUEUE
+from logs_to_queue import LOG_FILE_CHECKER, NEW_LINE_QUEUE
 from config import Config
 
 app = Flask(__name__)
@@ -59,13 +59,16 @@ def get_logs():
 
 def tail_logs_file():
     while True:
-        # line = f.stdout.readline()
-        # socketio.emit('response', {'text': line.decode()})
-        if NEW_LINE_QUEUE.empty():
-            print('************ QUEUE EMPTY!')
+        # if NEW_LINE_QUEUE.empty():
+        if not LOG_FILE_CHECKER.logs_queue:
+            # print('************ QUEUE EMPTY!')
+            pass
         else:
             print('************ QUEUE NOT EMPTY!')
-            new_line = NEW_LINE_QUEUE.get()
+            print('************ QUEUE NOT EMPTY!')
+            print('************ QUEUE NOT EMPTY!')
+            # new_line = NEW_LINE_QUEUE.get()
+            new_line = LOG_FILE_CHECKER.logs_queue.pop(0)
             # socketio.emit('response', {'text': i + 1})
             socketio.emit('response', {
                 'text': new_line['new_line'],
@@ -84,16 +87,9 @@ def client(msg):
     print("client connect..", msg)
     fp_path = msg['fp_path']
 
-    if fp_path not in ALL_FP_MAP:
-        logsObj = LogsQueue(Config.LASTS_VIEW_LINES, log_path=fp_path)
-        time.sleep(1)
-        ALL_FP_MAP[fp_path] = logsObj
-
-    else:
-        logsObj = ALL_FP_MAP[fp_path]
-
-    for line in logsObj.pre_logs:
-        print('返回中。。。')
+    LOG_FILE_CHECKER.push_to_files_queue(fp_path)
+    for line in LOG_FILE_CHECKER.pre_logs_map[fp_path]['logs']:
+        print('返回缓存中。。。')
         emit('response', {'text': line, 'path': fp_path})
 
 
