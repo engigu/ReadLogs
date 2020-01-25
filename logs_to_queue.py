@@ -151,12 +151,21 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
     def get_pre_logs(self, log_path, size):
         if not Config.SHOW_LINE_NO:
             shell = 'tail -n %s "%s"' % (size, log_path)
+            lines = subprocess.getoutput(shell)
+            return lines.split('\n')
         else:
             # shell = 'tail -n %s "%s" | nl' % (size, log_path)
             shell = 'cat -n "%s" | tail -n %s' % (log_path, size)
-
-        lines = subprocess.getoutput(shell)
-        return lines.split('\n')
+            lines = subprocess.getoutput(shell)
+            lines = [self.format_new_line(line) for line in lines.split('\n')] 
+            return lines
+    
+    def format_new_line(self, line):
+        # 主要是格式化行号， 第一个就是行号
+        line_tmp = line.strip().split('	')
+        new_lineno = '[%s] ' % line_tmp[0]
+        line_tmp[0] = new_lineno
+        return ' '.join(line_tmp)
 
     def get_lines(self, log_path):
         # 128 app.py
