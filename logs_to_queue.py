@@ -198,7 +198,7 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
                 lp_info['lines'] = new_line_num
                 try:
                     for new_line in new_lines:
-                        print('更新的行：', new_line)
+                        # print('更新的行：', new_line)
                         old_list = self.pre_logs_map[log_path]['logs']
                         self.pre_logs_map[log_path]['logs'] = self.push_newline_to_list(
                             line_list=old_list, newline=new_line, size=self.pre_logs_size

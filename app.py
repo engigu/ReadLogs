@@ -66,17 +66,26 @@ def tail_logs_file():
         else:
             print('************ QUEUE LEN', len(LOG_FILE_CHECKER.logs_queue))
             # new_line = NEW_LINE_QUEUE.get()
-            new_line = LOG_FILE_CHECKER.logs_queue.pop(0)
-            # socketio.emit('response', {'text': i + 1})
-            socketio.emit('response', {
-                'text': new_line['new_line'],
-                'path': new_line['path']
-            })
+            with Lock():
+                new_lines = [
+                    LOG_FILE_CHECKER.logs_queue.pop(0)
+                    for _ in range(Config.LOG_QUEUE_PER_FETCH)
+                    if LOG_FILE_CHECKER.logs_queue
+                ]
+
+            for new_line in new_lines:
+                socketio.emit('response', {
+                    'text': new_line['new_line'],
+                    'path': new_line['path']
+                })
         time.sleep(1)
 
 
-TAIL_QUEUE_THREAD = Thread(target=tail_logs_file)
-TAIL_QUEUE_THREAD.start()
+# 启动多个线程消费，目前一个跟不上
+for _ in range(Config.LOG_QUEUE_CONSUMERS):
+    TAIL_QUEUE_THREAD = Thread(target=tail_logs_file)
+    TAIL_QUEUE_THREAD.start()
+
 ALL_FP_MAP = {}
 
 
@@ -116,13 +125,12 @@ def main():
     """ Homepage to render data"""
     res = get_logs()
     return render_template(
-        'log.html', data=res, 
-        html_title=Config.HTML_TITLE, 
-        view_num=Config.LASTS_VIEW_LINES+10
+        'log.html', data=res,
+        html_title=Config.HTML_TITLE,
+        view_num=Config.LASTS_VIEW_LINES + 10
         # view_num=3
     )
 
 
 if __name__ == "__main__":
     run()
-
