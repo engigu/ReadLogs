@@ -112,11 +112,17 @@ def run():
 #     res = get_logs()
 #     return render_template('index.html', data=res, html_title=Config.HTML_TITLE)
 
+
 @app.route('/', methods=['GET'])
 def main():
     """ Homepage to render data"""
     res = get_logs()
-    return render_template('log.html', data=res, html_title=Config.HTML_TITLE)
+    return render_template(
+        'log.html', data=res, 
+        html_title=Config.HTML_TITLE, 
+        view_num=Config.LASTS_VIEW_LINES+10
+        # view_num=3
+    )
 
 
 if __name__ == "__main__":

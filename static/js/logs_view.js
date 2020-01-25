@@ -16,11 +16,21 @@ $(document).ready(function () {
     // socket.emit('client', {'fp_path': fp_path});
 
     socket.on('response', function (res) {
-        console.log(res)
+        // console.log(res)
         if (res.path === fp_path) {
             var top_info = res.text;
-            // var old = document.getElementById("terminal").innerHTML;
-            $("#terminal").append('<li>' + top_info + '</li>');
+            var current_length = $('#terminal li').length;
+            var limit_length = $('#terminal').attr("num"); 
+            limit_length = Number(limit_length);
+            // console.log(current_length, limit_length);
+            if (current_length >= limit_length){
+			    $("#terminal li:first").remove();
+            }
+            $("#terminal").append("<li> None </pli>");
+            $("#terminal li:last").text(top_info);
+            
+            window.scrollTo(0, document.documentElement.clientHeight);
+
         }
 
     });
