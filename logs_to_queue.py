@@ -152,7 +152,8 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
         if not Config.SHOW_LINE_NO:
             shell = 'tail -n %s "%s"' % (size, log_path)
         else:
-            shell = 'tail -n %s "%s" | nl' % (size, log_path)
+            # shell = 'tail -n %s "%s" | nl' % (size, log_path)
+            shell = 'cat -n "%s" | tail -n %s' % (log_path, size)
 
         lines = subprocess.getoutput(shell)
         return lines.split('\n')
