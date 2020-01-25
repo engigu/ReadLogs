@@ -64,9 +64,7 @@ def tail_logs_file():
             # print('************ QUEUE EMPTY!')
             pass
         else:
-            print('************ QUEUE NOT EMPTY!')
-            print('************ QUEUE NOT EMPTY!')
-            print('************ QUEUE NOT EMPTY!')
+            print('************ QUEUE LEN', len(LOG_FILE_CHECKER.logs_queue))
             # new_line = NEW_LINE_QUEUE.get()
             new_line = LOG_FILE_CHECKER.logs_queue.pop(0)
             # socketio.emit('response', {'text': i + 1})
@@ -89,13 +87,13 @@ def client(msg):
 
     LOG_FILE_CHECKER.push_to_files_queue(fp_path)
     for line in LOG_FILE_CHECKER.pre_logs_map[fp_path]['logs']:
-        print('返回缓存中。。。')
         emit('response', {'text': line, 'path': fp_path})
 
 
-@socketio.on('leavepage')
-def leavepage(msg):
-    print("leavepage..", msg)
+# client断开会自动触发
+@socketio.on('disconnect')
+def disconnect():
+    print("disconnect from", request.sid)
 
 
 def run():
