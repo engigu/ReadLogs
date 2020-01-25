@@ -10,3 +10,4 @@ class Config:
     HTML_TITLE = 'Logs Viewer'
 
     LASTS_VIEW_LINES = 20
+    SHOW_LINE_NO = False

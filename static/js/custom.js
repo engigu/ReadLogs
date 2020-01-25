@@ -46,7 +46,7 @@ var renderData = function (data) {
 
 
 socket.on('response', function (res) {
-	console.log(res)
+	console.log(res);
 	if (res.path === fp_path) {
 		var top_info = res.text;
 		// var old = document.getElementById("terminal").innerHTML;
@@ -71,10 +71,10 @@ socket.on('response', function (res) {
 
 
 
-$(".dropdown").select2().on("change", function (e) {
+$(".dropdown").on("change", function (e) {
 	var filepath = $('.dropdown').val();
 	// getData(filepath, true);
-	fp_path = filepath
+	fp_path = filepath;
 	socket.emit('client', { 'fp_path': filepath });
 	$(".renderBlock").html(""); // 切换清空显示区域
 

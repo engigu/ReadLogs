@@ -149,7 +149,12 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
         return self.pre_logs_map[log_path]
 
     def get_pre_logs(self, log_path, size):
-        lines = subprocess.getoutput('tail -n %s "%s"' % (size, log_path))
+        if not Config.SHOW_LINE_NO:
+            shell = 'tail -n %s "%s"' % (size, log_path)
+        else:
+            shell = 'tail -n %s "%s" | nl' % (size, log_path)
+
+        lines = subprocess.getoutput(shell)
         return lines.split('\n')
 
     def get_lines(self, log_path):
@@ -177,7 +182,8 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
                 # 文件更新了，有新日志, 获取新的更新行
                 new_line_num = self.get_lines(log_path=log_path)
 
-                new_lines = self.get_pre_logs(log_path=log_path, size=new_line_num - lp_info['lines'])
+                d_value = new_line_num - lp_info['lines']
+                new_lines = self.get_pre_logs(log_path=log_path, size=d_value)
                 lp_info['mtime'] = mtime  # 更新map里的文件信息
                 lp_info['lines'] = new_line_num
                 try:
@@ -230,7 +236,7 @@ if __name__ == '__main__':
     # print(666)
     lq = LogFilesChecker(
         # files_queue=TO_CHECK_LOGS_FILES_QUEUE,
-                         logs_queue=NEW_LINE_QUEUE,
+        #                  logs_queue=NEW_LINE_QUEUE,
                          pre_logs_size=20)
     res = lq.push_to_files_queue(log_path='/home/sayheya/Desktop/tmp/read_logs/logs/celery.log')
     # lq.start_monitor_task()
