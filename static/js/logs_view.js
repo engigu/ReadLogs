@@ -26,18 +26,16 @@ $(document).ready(function () {
             if (current_length >= limit_length) {
                 $("#terminal li:first").remove();
             }
-            $("#terminal").append("<li> None </pli>");
-            $("#terminal li:last").text(top_info);
 
+            $("#terminal").append("<li> None </pli>");
+            var last_li = $("#terminal li:last");
+            last_li.text(top_info);
+            window.scrollTo(0,last_li.offset().top); // 页面滑动到这个位置
 
         }
 
     });
 
-    setInterval(function () {
-        // 一直滑动到最下面
-        window.scrollTo(0, document.documentElement.clientHeight);
-    }, 1000);
 
     $(window).bind('onbeforeunload', function () {    // 离开页面前关闭tail
         socket.emit('leavepage', { '_type': _type });
