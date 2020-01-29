@@ -1,12 +1,6 @@
-Interview Test
+# ReadLogs
 
-Goal: Read log files from specific directory and display latest 10 logs on file selection.
-
-Required files:
-app.py  : written business logic
-tests.py: written possible test cases
-templates: render data in html pages
-
+![image](https://user-images.githubusercontent.com/24751376/73341682-17447700-42b8-11ea-9735-40b333a85b9a.png)
 
 The app is built using Flask in Python and template made by Bootstrap library.
 
