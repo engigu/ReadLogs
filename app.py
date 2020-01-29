@@ -18,14 +18,9 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 
 
-# modifiedTime = {}
-
-# def remove_sapce(raw):
-#     rules = ['\\n']
-
-#     for rule in rules:
-#         raw = raw.replace(rule, '')
-#     return raw
+def has_run_on_linux():
+    if os.name != 'posix':
+        raise SystemExit('only support linux!!!!!')
 
 
 def files_from_dir(dirPath, logfiles={}):
@@ -40,7 +35,6 @@ def files_from_dir(dirPath, logfiles={}):
             if os.path.isdir(childPath):
                 files_from_dir(childPath, logfiles)
             else:
-                # modifiedTime[childPath] = os.path.getctime(childPath)
                 logfiles[root].append([childPath, child])
     except Exception as e:
         print(e)
@@ -105,21 +99,6 @@ def disconnect():
     print("disconnect from", request.sid)
 
 
-def run():
-    app.config['JSON_AS_ASCII'] = False
-    # handler = logging.FileHandler('logs/flask.log', encoding='utf-8')
-    # handler.setLevel(logging.DEBUG)
-    # app.logger.addHandler(handler)
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
-
-
-# @app.route('/', methods=['GET'])
-# def main():
-#     """ Homepage to render data"""
-#     res = get_logs()
-#     return render_template('index.html', data=res, html_title=Config.HTML_TITLE)
-
-
 @app.route('/', methods=['GET'])
 def main():
     """ Homepage to render data"""
@@ -130,6 +109,12 @@ def main():
         view_num=Config.LASTS_VIEW_LINES + 10
         # view_num=3
     )
+
+
+def run():
+    has_run_on_linux()
+    app.config['JSON_AS_ASCII'] = False
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
 
 
 if __name__ == "__main__":
