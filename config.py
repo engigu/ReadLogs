@@ -4,7 +4,13 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = 'aQRaFWWWaAa!#$43$aa!!!AsSSQ'
 
+
 class Config:
+
+    HTML_TITLE = 'Logs Viewer'
     
-    LASTS_LINES = 20
-    
+    LOG_QUEUE_CONSUMERS = 4  # log 队列消费者线程数目
+    LOG_QUEUE_PER_FETCH = 1  # log 队列消费者单个线程每次取出的数目
+
+    LASTS_VIEW_LINES = 20
+    SHOW_LINE_NO = True

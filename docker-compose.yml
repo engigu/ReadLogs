@@ -5,8 +5,13 @@ services:
       context: .
       dockerfile: Dockerfile
     image: "read-logs-server"
+    command: python -u app.py
     volumes: 
       - /tmp/project_logs:/code/logs
-      # - ./:/code
+      - ./:/code
     ports: 
       - "9700:5000"
+    logging:
+      options:
+        max-file: "3"
+        max-size: "50m"

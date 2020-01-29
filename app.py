@@ -1,28 +1,31 @@
-#!/usr/bin/env python
-"""
-Script is written to select log file
-from list of logs and return "last 10 lines"
-like "tail -f"
-"""
-__author__ = "Mitul Shah"
-__version__ = "1.0.0"
-
-import os
-from flask import (render_template, jsonify, request)
 import json
+import logging
+import time, os
 from collections import defaultdict
-from config import app, Config
 
-modifiedTime = {}
+from flask import Flask, render_template, jsonify, request
+from werkzeug.security import generate_password_hash, check_password_hash
+# from flask_httpauth import HTTPBasicAuth
+from flask_socketio import SocketIO, emit
+from threading import Thread, Lock
+
+from logs_to_queue import LOG_FILE_CHECKER, NEW_LINE_QUEUE
+from config import Config
+
+app = Flask(__name__)
+# auth = HTTPBasicAuth()
+
+socketio = SocketIO(app)
 
 
-def remove_sapce(raw):
-    rules = ['\\n']
-    
-    for rule in rules:
-        raw = raw.replace(rule, '')
-    return raw
+# modifiedTime = {}
 
+# def remove_sapce(raw):
+#     rules = ['\\n']
+
+#     for rule in rules:
+#         raw = raw.replace(rule, '')
+#     return raw
 
 
 def files_from_dir(dirPath, logfiles={}):
@@ -37,7 +40,7 @@ def files_from_dir(dirPath, logfiles={}):
             if os.path.isdir(childPath):
                 files_from_dir(childPath, logfiles)
             else:
-                modifiedTime[childPath] = os.path.getctime(childPath)
+                # modifiedTime[childPath] = os.path.getctime(childPath)
                 logfiles[root].append([childPath, child])
     except Exception as e:
         print(e)
@@ -54,57 +57,80 @@ def get_logs():
     return files
 
 
-@app.route('/api/getcontent', methods=['POST'])
-def get_content():
-    """
-    function behave like "tail -f"
-    input: file path
-    output: return line from file
-    """
-    results = {'modified': False, 'lines': []}
-    modified = False
-    try:
-        fn = request.json['path']
-        newfile = request.json['isNewFile']
-        lastmodified = os.path.getctime(fn)
+def tail_logs_file():
+    while True:
+        # if NEW_LINE_QUEUE.empty():
+        if not LOG_FILE_CHECKER.logs_queue:
+            # print('************ QUEUE EMPTY!')
+            pass
+        else:
+            print('************ QUEUE LEN', len(LOG_FILE_CHECKER.logs_queue))
+            # new_line = NEW_LINE_QUEUE.get()
+            with Lock():
+                new_lines = [
+                    LOG_FILE_CHECKER.logs_queue.pop(0)
+                    for _ in range(Config.LOG_QUEUE_PER_FETCH)
+                    if LOG_FILE_CHECKER.logs_queue
+                ]
 
-        # if user has changed file from dropdown, update modified time
-        if fn in modifiedTime and newfile:
-            modifiedTime[fn] = lastmodified
+            for new_line in new_lines:
+                socketio.emit('response', {
+                    'text': new_line['new_line'],
+                    'path': new_line['path']
+                })
+        time.sleep(1)
 
-        # if file is modified, update modified time and chang flag true
-        if fn in modifiedTime and modifiedTime[fn] < lastmodified:
-            modifiedTime[fn] = lastmodified
-            modified = True
 
-        # allow to run code if modified or change file from dropdown
-        if modified or newfile:
-            with open(fn, "r") as f:
-                f.seek(0, 2)
-                fsize = f.tell()
-                print('fsize', fsize)
-                if modified and not newfile:
-                    f.seek(0, 0)
-                    lines = f.readlines()
-                else:
-                    f.seek(max(fsize - 1024, 0), 0)
-                    lines = f.readlines()
-                    lines = lines[-Config.LASTS_LINES:]
-                lines = [remove_sapce(line) for line in lines]
-                results['lines'] = lines
-                results['modified'] = True
-    except Exception as e:
-        print(e)
+# 启动多个线程消费，目前一个跟不上
+for _ in range(Config.LOG_QUEUE_CONSUMERS):
+    TAIL_QUEUE_THREAD = Thread(target=tail_logs_file)
+    TAIL_QUEUE_THREAD.start()
 
-    return jsonify(results)
+ALL_FP_MAP = {}
+
+
+@socketio.on('client')
+def client(msg):
+    print("client connect..", msg)
+    fp_path = msg['fp_path']
+
+    LOG_FILE_CHECKER.push_to_files_queue(fp_path)
+    for line in LOG_FILE_CHECKER.pre_logs_map[fp_path]['logs']:
+        emit('response', {'text': line, 'path': fp_path})
+
+
+# client断开会自动触发
+@socketio.on('disconnect')
+def disconnect():
+    print("disconnect from", request.sid)
+
+
+def run():
+    app.config['JSON_AS_ASCII'] = False
+    # handler = logging.FileHandler('logs/flask.log', encoding='utf-8')
+    # handler.setLevel(logging.DEBUG)
+    # app.logger.addHandler(handler)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+
+
+# @app.route('/', methods=['GET'])
+# def main():
+#     """ Homepage to render data"""
+#     res = get_logs()
+#     return render_template('index.html', data=res, html_title=Config.HTML_TITLE)
 
 
 @app.route('/', methods=['GET'])
 def main():
     """ Homepage to render data"""
     res = get_logs()
-    return render_template('index.html', data=res)
+    return render_template(
+        'log.html', data=res,
+        html_title=Config.HTML_TITLE,
+        view_num=Config.LASTS_VIEW_LINES + 10
+        # view_num=3
+    )
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    run()
