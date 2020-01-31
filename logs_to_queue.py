@@ -1,6 +1,7 @@
 import base64
 import subprocess
-import time, os
+import time
+import os
 
 from multiprocessing import Queue
 from threading import Thread, Lock
@@ -22,7 +23,8 @@ class SameOriginSingleton(type):
     def __call__(cls, *args, **kwargs):
         params_ident = cls.calc_params_identify(str(args) + str(kwargs))
         if params_ident not in cls._instances:
-            cls._instances[params_ident] = super(SameOriginSingleton, cls).__call__(*args, **kwargs)
+            cls._instances[params_ident] = super(
+                SameOriginSingleton, cls).__call__(*args, **kwargs)
         return cls._instances[params_ident]
 
 
@@ -30,8 +32,8 @@ NEW_LINE_QUEUE = Queue()   # 暂时不知道queue使用不了，会阻塞在put�
 # TO_CHECK_LOGS_FILES_QUEUE = Queue()  # 直接把检查的文件丢进队列
 
 #####################################
-#### 使用python的with open
-#### 会出现一旦文件更新， flask就会卡死
+# 使用python的with open
+# 会出现一旦文件更新， flask就会卡死
 #####################################
 #
 # class LogsQueue(metaclass=SameOriginSingleton):
@@ -107,7 +109,7 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
             monitor_time: int = 10 * 60
     ):
         """
-        
+
         """
         # self.files_queue = files_queue
         self.files_queue = []
@@ -157,9 +159,9 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
             # shell = 'tail -n %s "%s" | nl' % (size, log_path)
             shell = 'cat -n "%s" | tail -n %s' % (log_path, size)
             lines = subprocess.getoutput(shell)
-            lines = [self.format_new_line(line) for line in lines.split('\n')] 
+            lines = [self.format_new_line(line) for line in lines.split('\n')]
             return lines
-    
+
     def format_new_line(self, line):
         # 主要是格式化行号， 第一个就是行号
         line_tmp = line.strip().split('	')
@@ -217,7 +219,6 @@ class LogFilesChecker(metaclass=SameOriginSingleton):
         t = Thread(target=self.run)
         t.start()
 
-
     def test(self):
         def get():
             while True:
@@ -247,6 +248,7 @@ if __name__ == '__main__':
     lq = LogFilesChecker(
         # files_queue=TO_CHECK_LOGS_FILES_QUEUE,
         #                  logs_queue=NEW_LINE_QUEUE,
-                         pre_logs_size=20)
-    res = lq.push_to_files_queue(log_path='/home/sayheya/Desktop/tmp/read_logs/logs/celery.log')
+        pre_logs_size=20)
+    res = lq.push_to_files_queue(
+        log_path='/home/sayheya/Desktop/tmp/read_logs/logs/celery.log')
     # lq.start_monitor_task()

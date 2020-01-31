@@ -4,7 +4,7 @@ import time, os
 from collections import defaultdict
 
 from flask import Flask, render_template, jsonify, request
-from werkzeug.security import generate_password_hash, check_password_hash
+# from werkzeug.security import generate_password_hash, check_password_hash
 # from flask_httpauth import HTTPBasicAuth
 from flask_socketio import SocketIO, emit
 from threading import Thread, Lock
@@ -76,10 +76,7 @@ def tail_logs_file():
 
 
 # 启动多个线程消费，目前一个跟不上
-for _ in range(Config.LOG_QUEUE_CONSUMERS):
-    TAIL_QUEUE_THREAD = Thread(target=tail_logs_file)
-    TAIL_QUEUE_THREAD.start()
-
+[Thread(target=tail_logs_file).start() for _ in range(Config.LOG_QUEUE_CONSUMERS)]
 ALL_FP_MAP = {}
 
 
